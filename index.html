@@ -28,6 +28,7 @@
             padding: 15px;
             margin: 0;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         h2, h3, .header-bar, .nav-btn, .btn-glass-add, th, .pill.active, #table-month-indicator, .stat-item small {
@@ -44,14 +45,57 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .nav { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 5px; overflow-x: auto; }
+        .nav { 
+            display: flex; 
+            gap: 15px; 
+            margin-bottom: 25px; 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 5px; 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .nav::-webkit-scrollbar { display: none; }
+
         .nav-btn { 
             background: none; border: none; color: #64748b; cursor: pointer; 
             font-size: 0.9rem; display: flex; align-items: center; gap: 8px; 
             padding: 10px 5px; transition: 0.3s; white-space: nowrap; 
-            font-family: 'Kanit', sans-serif;
         }
         .nav-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+        /* GLASS PILLS MOBILE-READY STYLING */
+        .month-pills {
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+            overflow-x: auto; 
+            padding: 5px 2px;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+            scrollbar-width: none; /* Hide scrollbar Firefox */
+        }
+        .month-pills::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome/Safari */
+
+        .pill {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            color: #94a3b8;
+            padding: 8px 20px;
+            border-radius: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            flex-shrink: 0; /* Prevents pills from squishing on mobile */
+        }
+
+        .pill.active {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+        }
 
         .glass-card { 
             background: var(--glass); 
@@ -60,7 +104,6 @@
             border-radius: 24px; 
             padding: 20px; 
             margin-bottom: 20px; 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); 
         }
 
         .btn-glass-add { 
@@ -70,7 +113,6 @@
             color: white; padding: 14px; border-radius: 16px; 
             cursor: pointer; width: 100%; font-size: 1rem;
             font-family: 'Kanit', sans-serif;
-            transition: all 0.3s ease;
         }
 
         input, select { 
@@ -79,42 +121,45 @@
             color: white; padding: 14px; border-radius: 14px; font-size: 1rem;
             width: 100%; box-sizing: border-box; margin-bottom: 12px;
             font-family: 'Kanit', sans-serif;
-            font-weight: 400;
         }
 
-        .month-pills { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; }
-        .pill { 
-            background: rgba(255, 255, 255, 0.05); 
-            border: 1px solid var(--border); 
-            padding: 8px 18px; border-radius: 30px; font-size: 0.8rem; 
-            cursor: pointer; white-space: nowrap; color: #94a3b8;
-            font-weight: 400;
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+            margin-bottom: 20px; 
         }
-        .pill.active { background: rgba(255, 255, 255, 0.1); border-color: var(--accent); color: white; }
-
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        
         .stat-item { 
             text-align: center; background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(10px); padding: 15px; border-radius: 20px; border: 1px solid var(--border); 
+            padding: 15px; border-radius: 20px; border: 1px solid var(--border); 
         }
-        .stat-item h2 { margin: 8px 0 2px 0; font-size: 1.3rem; color: var(--accent); }
+        
+        .stat-item h2 { margin: 8px 0 2px 0; font-size: 1.2rem; color: var(--accent); }
 
+        .table-wrap { overflow-x: auto; border-radius: 12px; }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th { text-align: left; padding: 14px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; }
-        td { padding: 14px; border-top: 1px solid var(--border); font-size: 0.85rem; color: #cbd5e1; font-weight: 400; }
+        td { padding: 14px; border-top: 1px solid var(--border); font-size: 0.85rem; color: #cbd5e1; }
 
         .section { display: none; }
         .section.active { display: block; }
 
         .modal { 
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(25px);
-            padding: 30px; border-radius: 28px; z-index: 100; 
-            border: 1px solid var(--border); width: 85%; max-width: 380px; 
+            background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(25px);
+            padding: 25px; border-radius: 28px; z-index: 100; 
+            border: 1px solid var(--border); width: 90%; max-width: 380px; 
         }
         .modal.active { display: block; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 99; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99; }
         .overlay.active { display: block; }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-item h2 { font-size: 1rem; }
+            .pill { padding: 8px 15px; font-size: 0.8rem; }
+        }
     </style>
 </head>
 <body>
@@ -131,62 +176,74 @@
 
     <div id="dashboard" class="section active">
         <div class="glass-card">
-            <div style="font-weight:600; font-size: 0.95rem; margin-bottom: 15px;"><span style="color:var(--warning)">⚡</span> Quick Add</div>
+            <div style="font-weight:600; font-size: 0.9rem; margin-bottom: 12px;">Quick Add</div>
             <input type="text" id="dash-item" placeholder="Item">
             <input type="number" id="dash-amt" placeholder="Amount">
             <select id="dash-cat" class="category-dropdown"></select>
-            <button class="btn-glass-add" onclick="submitEntry('Daily Tracker', ['dash-item','dash-amt','dash-cat'])">Add Transaction</button>
+            <button class="btn-glass-add" onclick="submitEntry('Daily Tracker', ['dash-item','dash-amt','dash-cat'])">Add</button>
         </div>
+
         <div class="month-pills" id="month-pills"></div>
+        
         <div class="stats-grid">
-            <div class="stat-item"><h2 id="total-salary">₱0</h2><small>Total Salary</small></div>
+            <div class="stat-item"><h2 id="total-salary">₱0</h2><small>Salary</small></div>
             <div class="stat-item"><h2 id="total-spent">₱0</h2><small>Spent</small></div>
-            <div class="stat-item"><h2 id="total-trans">0</h2><small>Count</small></div>
+            <div class="stat-item"><h2 id="total-trans">0</h2><small>Items</small></div>
             <div class="stat-item"><h2 id="daily-avg">₱0</h2><small>Daily Avg</small></div>
-            <div class="stat-item" style="grid-column: span 2; border-color: var(--accent);"><h2 id="total-savings-dash">₱0</h2><small>Total Savings</small></div>
+            <div class="stat-item" style="grid-column: 1 / -1; border-color: var(--accent);"><h2 id="total-savings-dash">₱0</h2><small>Savings Balance</small></div>
         </div>
-        <div class="glass-card"><div style="height:220px;"><canvas id="monthlyChart"></canvas></div></div>
+        <div class="glass-card"><div style="height:200px;"><canvas id="monthlyChart"></canvas></div></div>
     </div>
 
     <div id="daily" class="section">
-        <button class="btn-glass-add" style="margin-bottom:20px;" onclick="openModal('expenseModal')">+ Add Expense</button>
+        <button class="btn-glass-add" style="margin-bottom:15px;" onclick="openModal('expenseModal')">+ Add Expense</button>
         <div class="glass-card">
-            <div id="table-month-indicator" style="padding-bottom: 15px; color: var(--accent);">Viewing: ...</div>
-            <div class="table-wrap"><table id="expenseTable"><thead><tr><th>ID</th><th>Item</th><th>Amount</th><th>Date</th><th>Category</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+            <div id="table-month-indicator" style="padding-bottom: 10px; color: var(--accent); font-size: 0.9rem;">Viewing: ...</div>
+            <div class="table-wrap">
+                <table id="expenseTable">
+                    <thead><tr><th>ID</th><th>Item</th><th>Amount</th><th>Date</th><th>Category</th><th>Month</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <div id="salary" class="section">
-        <button class="btn-glass-add" style="margin-bottom:20px;" onclick="openModal('salaryModal')">+ Add Salary</button>
-        <div class="glass-card table-wrap"><table id="salaryTable"><thead><tr><th>ID</th><th>Source</th><th>Amount</th><th>Date</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        <button class="btn-glass-add" style="margin-bottom:15px;" onclick="openModal('salaryModal')">+ Add Salary</button>
+        <div class="glass-card table-wrap">
+            <table id="salaryTable">
+                <thead><tr><th>ID</th><th>Source</th><th>Amount</th><th>Date</th>
+<th style="alignment: right;">Actions</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
     <div id="installments" class="section">
-        <button class="btn-glass-add" style="margin-bottom:20px;" onclick="openModal('instModal')">+ New Plan</button>
-        <div class="glass-card table-wrap"><table id="instTable"><thead><tr><th>ID</th><th>Product</th><th>Total</th><th>Monthly</th><th>Rem.</th><th>Due</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        <button class="btn-glass-add" style="margin-bottom:15px;" onclick="openModal('instModal')">+ New Plan</button>
+        <div class="glass-card table-wrap">
+            <table id="instTable">
+                <thead><tr><th>ID</th><th>Product</th><th>Total</th><th>Monthly</th><th>Rem.</th><th>Due</th><th>Actions</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
     <div id="savings" class="section">
-        <button class="btn-glass-add" style="margin-bottom:20px;" onclick="prepareSavingsModal()">+ New Goal</button>
-        <div class="glass-card table-wrap"><table id="savingsTable"><thead><tr><th>ID</th><th>Goal</th><th>Target</th><th>Current</th></tr></thead><tbody></tbody></table></div>
+        <button class="btn-glass-add" style="margin-bottom:15px;" onclick="prepareSavingsModal()">+ New Goal</button>
+        <div class="glass-card table-wrap">
+            <table id="savingsTable">
+                <thead><tr><th>ID</th><th>Goal</th><th>Target</th><th>Current</th><th>Last Updated</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
     <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
-    
     <div id="expenseModal" class="modal"><h3>Add Expense</h3><input type="text" id="exp-item" placeholder="Item"><input type="number" id="exp-amt" placeholder="Amount"><select id="exp-cat" class="category-dropdown"></select><button class="btn-glass-add" onclick="submitEntry('Daily Tracker', ['exp-item','exp-amt','exp-cat'])">Save</button></div>
-    
     <div id="salaryModal" class="modal"><h3>Add Salary</h3><input type="text" id="sal-source" placeholder="Source"><input type="number" id="sal-amt" placeholder="Amount"><button class="btn-glass-add" onclick="submitEntry('Salary', ['sal-source','sal-amt'])">Save</button></div>
-    
-    <div id="instModal" class="modal"><h3>New Plan</h3><input type="text" id="ins-prod" placeholder="Product"><input type="number" id="ins-total" placeholder="Total"><input type="number" id="ins-month" placeholder="Monthly"><input type="number" id="ins-rem" placeholder="Remaining"><input type="text" id="ins-due" placeholder="Due Date"><button class="btn-glass-add" onclick="submitEntry('Installments', ['ins-prod','ins-total','ins-month','ins-rem','ins-due'])">Save Plan</button></div>
-    
-    <div id="savingsModal" class="modal">
-        <h3 id="sav-title">New Goal</h3>
-        <input type="hidden" id="sav-id">
-        <input type="text" id="sav-goal" placeholder="Goal">
-        <input type="number" id="sav-target" placeholder="Target">
-        <input type="number" id="sav-current" placeholder="Current">
-        <button id="sav-btn" class="btn-glass-add" onclick="submitEntry('Savings', ['sav-goal','sav-target','sav-current'], document.getElementById('sav-id').value)">Save Goal</button>
-    </div>
+    <div id="instModal" class="modal"><h3>New Plan</h3><input type="text" id="ins-prod" placeholder="Product"><input type="number" id="ins-total" placeholder="Total"><input type="number" id="ins-month" placeholder="Monthly"><input type="number" id="ins-rem" placeholder="Remaining"><input type="text" id="ins-due" placeholder="Due Date"><button class="btn-glass-add" onclick="submitEntry('Installments', ['ins-prod','ins-total','ins-month','ins-rem','ins-due'])">Save</button></div>
+    <div id="savingsModal" class="modal"><h3 id="sav-title">Goal</h3><input type="hidden" id="sav-id"><input type="text" id="sav-goal" placeholder="Goal"><input type="number" id="sav-target" placeholder="Target"><input type="number" id="sav-current" placeholder="Current"><button class="btn-glass-add" onclick="submitEntry('Savings', ['sav-goal','sav-target','sav-current'], document.getElementById('sav-id').value)">Save</button></div>
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdb_CQHcB9RI8tW6XQHlHQT7GGp_9FkAHzlwCg1Vhw1K7PvUOdbyA8lhFn-fpoIaQ/exec';
@@ -217,34 +274,11 @@
         function renderTable(tableId, data, sheetName) {
             const tbody = document.querySelector(`#${tableId} tbody`);
             tbody.innerHTML = data.map(item => {
-                if(!item.id || item.values[0] === 'Product' || item.values[0] === 'Goal') return '';
-                
-                let editBtn = '';
-                if(sheetName === 'Savings') {
-                    editBtn = `<button onclick="editSavings('${item.id}', '${item.values[0]}', '${item.values[1]}', '${item.values[2]}')" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:1.1rem; margin-right:10px;">✏️</button>`;
-                }
-
+                if(!item.id || item.values[0] === 'Product' || item.values[0] === 'Goal' || item.values[0] === 'Source') return '';
+                let editBtn = (sheetName === 'Savings') ? `<button onclick="editSavings('${item.id}', '${item.values[0]}', '${item.values[1]}', '${item.values[2]}')" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:1rem; margin-right:8px;">✏️</button>` : '';
                 const cells = item.values.map(v => `<td>${(typeof v === 'string' && v.includes('T')) ? v.split('T')[0] : v || ''}</td>`).join('');
-                return `<tr><td>${item.id}</td>${cells}<td>${editBtn}<button onclick="deleteEntry('${sheetName}', '${item.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.1rem;">❌</button></td></tr>`;
+                return `<tr><td>${item.id}</td>${cells}<td>${editBtn}<button onclick="deleteEntry('${sheetName}', '${item.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1rem;">❌</button></td></tr>`;
             }).join('');
-        }
-
-        function prepareSavingsModal() {
-            document.getElementById('sav-title').innerText = "New Goal";
-            document.getElementById('sav-id').value = "";
-            document.getElementById('sav-goal').value = "";
-            document.getElementById('sav-target').value = "";
-            document.getElementById('sav-current').value = "";
-            openModal('savingsModal');
-        }
-
-        function editSavings(id, goal, target, current) {
-            document.getElementById('sav-title').innerText = "Edit Goal";
-            document.getElementById('sav-id').value = id;
-            document.getElementById('sav-goal').value = goal;
-            document.getElementById('sav-target').value = target;
-            document.getElementById('sav-current').value = current;
-            openModal('savingsModal');
         }
 
         function renderPills() {
@@ -264,7 +298,6 @@
             state.salary.forEach(s => { if(new Date(s.values[2]).toLocaleString('default', { month: 'long' }) === selectedMonth) totalSalary += parseFloat(s.values[1]) || 0; });
             state.expenses.forEach(e => { if (e.values[4] === selectedMonth) { totalSpent += parseFloat(e.values[1]) || 0; trans++; } });
             state.savings.forEach(sv => { if(sv.values[2]) totalSavings += parseFloat(sv.values[2]) || 0; });
-
             document.getElementById('total-salary').innerText = `₱${totalSalary.toLocaleString()}`;
             document.getElementById('total-spent').innerText = `₱${totalSpent.toLocaleString()}`;
             document.getElementById('total-trans').innerText = trans;
@@ -274,45 +307,30 @@
         }
 
         function renderAll() {
-            const filteredExpenses = state.expenses.filter(e => e.values[4] === selectedMonth);
-            document.getElementById('table-month-indicator').innerText = `Viewing: ${selectedMonth}`;
-            renderTable('expenseTable', filteredExpenses, 'Daily Tracker');
+            renderTable('expenseTable', state.expenses.filter(e => e.values[4] === selectedMonth), 'Daily Tracker');
             renderTable('salaryTable', state.salary, 'Salary');
             renderTable('savingsTable', state.savings, 'Savings');
             renderTable('instTable', state.installments, 'Installments');
+            document.getElementById('table-month-indicator').innerText = `Viewing: ${selectedMonth}`;
         }
 
         async function submitEntry(sheet, fields, id = null) {
-            const btn = event.target; 
-            const originalText = btn.innerText;
-            btn.innerText = "Saving...";
-            
+            const btn = event.target; btn.innerText = "Wait...";
             const data = fields.map(fid => document.getElementById(fid).value);
             const now = new Date();
-            let finalData = [];
-            
-            if (sheet === 'Daily Tracker') finalData = [data[0], data[1], now.toISOString().split('T')[0], data[2], now.toLocaleString('default', { month: 'long' })];
-            else if (sheet === 'Salary') finalData = [data[0], data[1], now.toLocaleDateString()];
-            else if (sheet === 'Savings') finalData = [data[0], data[1], data[2], now.toLocaleDateString()];
-            else finalData = data;
-
-            let action = id ? 'updateEntry' : 'addEntry';
-            let url = `${SCRIPT_URL}?action=${action}&sheet=${sheet}&data=${encodeURIComponent(JSON.stringify(finalData))}`;
-            if(id) url += `&id=${id}`;
-
-            try {
-                await fetch(url);
-                location.reload();
-            } catch(e) {
-                btn.innerText = originalText;
-                alert("Error saving data.");
-            }
+            let finalData = (sheet === 'Daily Tracker') ? [data[0], data[1], now.toISOString().split('T')[0], data[2], now.toLocaleString('default', { month: 'long' })] : 
+                            (sheet === 'Salary') ? [data[0], data[1], now.toLocaleDateString()] : 
+                            (sheet === 'Savings') ? [data[0], data[1], data[2], now.toLocaleDateString()] : data;
+            let url = `${SCRIPT_URL}?action=${id ? 'updateEntry' : 'addEntry'}&sheet=${sheet}&data=${encodeURIComponent(JSON.stringify(finalData))}${id ? `&id=${id}` : ''}`;
+            await fetch(url); location.reload();
         }
 
         async function deleteEntry(sheet, id) { if (confirm('Delete?')) { await fetch(`${SCRIPT_URL}?action=deleteEntry&sheet=${sheet}&id=${id}`); location.reload(); } }
         function openModal(id) { document.getElementById(id).classList.add('active'); document.getElementById('overlay').classList.add('active'); }
         function closeAllModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); document.getElementById('overlay').classList.remove('active'); }
-        
+        function prepareSavingsModal() { document.getElementById('sav-title').innerText = "New Goal"; document.getElementById('sav-id').value = ""; document.getElementById('sav-goal').value = ""; document.getElementById('sav-target').value = ""; document.getElementById('sav-current').value = ""; openModal('savingsModal'); }
+        function editSavings(id, goal, target, current) { document.getElementById('sav-title').innerText = "Edit Goal"; document.getElementById('sav-id').value = id; document.getElementById('sav-goal').value = goal; document.getElementById('sav-target').value = target; document.getElementById('sav-current').value = current; openModal('savingsModal'); }
+
         function updateDropdowns() {
             const dropdowns = document.querySelectorAll('.category-dropdown');
             const defaults = ["Food & Diet", "Household Bills", "Others"];
