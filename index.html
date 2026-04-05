@@ -40,7 +40,7 @@
             color: white; border: none; padding: 14px; border-radius: 12px; 
             font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem;
         }
-        .btn-glass-add:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-glass-add:disabled { opacity: 0.5; }
 
         input, select { 
             background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); color: white; 
@@ -49,7 +49,7 @@
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .stat-item { text-align: center; background: rgba(30, 41, 59, 0.4); padding: 15px; border-radius: 18px; border: 1px solid var(--border); }
-        .stat-item h2 { margin: 8px 0 2px 0; font-size: 1.1rem; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stat-item h2 { margin: 8px 0 2px 0; font-size: 1.1rem; color: var(--accent); }
 
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 450px; }
@@ -58,7 +58,7 @@
 
         .section { display: none; }
         .section.active { display: block; }
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; padding: 25px; border-radius: 20px; z-index: 100; border: 1px solid var(--accent); width: 85%; max-width: 380px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; padding: 25px; border-radius: 20px; z-index: 100; border: 1px solid var(--accent); width: 85%; max-width: 380px; }
         .modal.active { display: block; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99; backdrop-filter: blur(4px); }
         .overlay.active { display: block; }
@@ -66,7 +66,7 @@
 </head>
 <body>
 
-    <div class="header-bar" id="current-date">Finance Dashboard</div>
+    <div class="header-bar">Finance Dashboard</div>
 
     <div class="nav">
         <button class="nav-btn active" onclick="showSection('dashboard', event)">📊 Dashboard</button>
@@ -91,7 +91,7 @@
                     <option value="Home Credit - King Koil Mattress">Home Credit - King Koil Mattress</option>
                     <option value="GGives">GGives</option>
                 </select>
-                <button class="btn-glass-add" id="main-submit" onclick="submitEntry('Daily Tracker', ['dash-item','dash-amt','dash-cat'])">Log Transaction</button>
+                <button class="btn-glass-add" onclick="submitEntry('Daily Tracker', ['dash-item','dash-amt','dash-cat'])">Log Transaction</button>
             </div>
         </div>
 
@@ -146,12 +146,12 @@
 
     <div id="instModal" class="modal">
         <h3>New Installment Plan</h3>
-        <input type="text" id="ins-prod" placeholder="Product (e.g. Samsung Phone)">
+        <input type="text" id="ins-prod" placeholder="Product Name">
         <input type="number" id="ins-total" placeholder="Total Cost">
         <input type="number" id="ins-month" placeholder="Monthly Payment">
         <input type="number" id="ins-rem" placeholder="Initial Remaining">
         <input type="text" id="ins-due" placeholder="Due Date">
-        <button class="btn-glass-add" style="width:100%;" onclick="submitEntry('Installments', ['ins-prod','ins-total','ins-month','ins-rem','ins-due'])">Save Plan</button>
+        <button class="btn-glass-add" style="width:100%;" onclick="submitEntry('Installments', ['ins-prod','ins-total','ins-month','ins-rem','ins-due'])">Save</button>
     </div>
 
     <script>
@@ -164,13 +164,13 @@
                 const res = await fetch(`${SCRIPT_URL}?action=dashboard`);
                 state = await res.json();
                 updateUI();
-            } catch (e) { console.error("Initial load failed", e); }
+            } catch (e) { console.error(e); }
         }
 
         function updateUI() {
             const currentMonth = new Date().toLocaleString('default', { month: 'long' });
             
-            // 1. Dashboard Stats Calculation
+            // Stats logic
             const monthlySpent = state.expenses
                 .filter(e => e.values[4] === currentMonth)
                 .reduce((sum, e) => sum + (parseFloat(e.values[1]) || 0), 0);
@@ -181,7 +181,7 @@
             document.getElementById('total-spent').innerText = `₱${monthlySpent.toLocaleString()}`;
             document.getElementById('debt-bal').innerText = `₱${totalDebt.toLocaleString()}`;
 
-            // 2. Render Tables
+            // --- FIXED TABLE RENDERING ---
             renderTable('expenseTable', state.expenses, 'Daily Tracker');
             renderTable('salaryTable', state.salary, 'Salary');
             renderTable('instTable', state.installments, 'Installments');
@@ -191,12 +191,22 @@
 
         function renderTable(tableId, data, sheetName) {
             const tbody = document.querySelector(`#${tableId} tbody`);
-            tbody.innerHTML = data.map(item => `
+            tbody.innerHTML = data.map(item => {
+                // We skip item.id because it's the timestamp/ID column in the sheet
+                const rowCells = item.values.map(v => {
+                    // Check if value is a date string and clean it up for display
+                    if (typeof v === 'string' && v.includes('T') && v.includes('Z')) {
+                        return `<td>${v.split('T')[0]}</td>`;
+                    }
+                    return `<td>${v || ''}</td>`;
+                }).join('');
+                
+                return `
                 <tr>
-                    ${item.values.map(v => `<td>${v}</td>`).join('')}
+                    ${rowCells}
                     <td><button onclick="deleteEntry('${sheetName}', ${item.id})" style="background:none; border:none; color:var(--danger); cursor:pointer;">🗑️</button></td>
-                </tr>
-            `).join('');
+                </tr>`;
+            }).join('');
         }
 
         async function submitEntry(sheet, fields) {
@@ -212,16 +222,11 @@
                 const amountPaid = parseFloat(data[1]);
                 const category = data[2];
 
-                // --- MATH & DEDUCTION LOGIC ---
                 if (category.includes("Home Credit")) {
                     const productName = category.replace("Home Credit - ", "").trim();
-                    // Match the product name in the installments list
                     const target = state.installments.find(i => i.values[0].toLowerCase() === productName.toLowerCase());
-                    
                     if (target) {
-                        const currentRemaining = parseFloat(target.values[3]);
-                        const newRemaining = currentRemaining - amountPaid;
-                        // Execute the backend subtraction
+                        const newRemaining = parseFloat(target.values[3]) - amountPaid;
                         await fetch(`${SCRIPT_URL}?action=updateRemaining&id=${target.id}&newVal=${newRemaining}`);
                     }
                 }
@@ -233,19 +238,16 @@
             }
 
             try {
-                const response = await fetch(`${SCRIPT_URL}?action=addEntry&sheet=${sheet}&data=${encodeURIComponent(JSON.stringify(finalData))}`);
-                if (response.ok) {
-                    location.reload();
-                }
+                await fetch(`${SCRIPT_URL}?action=addEntry&sheet=${sheet}&data=${encodeURIComponent(JSON.stringify(finalData))}`);
+                location.reload();
             } catch (e) {
-                alert("Error connecting to server.");
                 btn.disabled = false;
-                btn.innerText = "Retry";
+                btn.innerText = "Error";
             }
         }
 
         async function deleteEntry(sheet, id) { 
-            if (confirm('Delete this record?')) { 
+            if (confirm('Delete this?')) { 
                 await fetch(`${SCRIPT_URL}?action=deleteEntry&sheet=${sheet}&id=${id}`); 
                 location.reload(); 
             } 
@@ -254,12 +256,12 @@
         function renderChart() {
             const ctx = document.getElementById('monthlyChart').getContext('2d');
             const months = ["January", "February", "March", "April", "May", "June"];
-            const data = months.map(m => state.expenses.filter(e => e.values[4] === m).reduce((acc, curr) => acc + (parseFloat(curr.values[1]) || 0), 0));
+            const chartData = months.map(m => state.expenses.filter(e => e.values[4] === m).reduce((acc, curr) => acc + (parseFloat(curr.values[1]) || 0), 0));
             if (myChart) myChart.destroy();
             myChart = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: months, datasets: [{ label: 'Spent', data: data, backgroundColor: 'rgba(0, 210, 255, 0.4)', borderColor: '#00d2ff', borderWidth: 1, borderRadius: 5 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } } }, plugins: { legend: { display: false } } }
+                data: { labels: months, datasets: [{ label: 'Spent', data: chartData, backgroundColor: 'rgba(0, 210, 255, 0.4)', borderColor: '#00d2ff', borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
             });
         }
 
@@ -271,7 +273,6 @@
         }
         function openModal(id) { document.getElementById(id).classList.add('active'); document.getElementById('overlay').classList.add('active'); }
         function closeAllModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); document.getElementById('overlay').classList.remove('active'); }
-        
         window.onload = init;
     </script>
 </body>
