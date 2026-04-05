@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Command Center</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0b0f1a;
@@ -14,6 +13,7 @@
             --accent: #00d2ff;
             --purple: #9d50bb;
             --pink: #6e48aa;
+            --success: #00f2fe;
             --text: #f1f5f9;
             --warning: #ff9800;
             --danger: #ff4b2b;
@@ -29,10 +29,13 @@
         }
 
         .header-bar { background: linear-gradient(90deg, #312e81, #1e1b4b); padding: 12px 20px; margin: -15px -15px 25px -15px; font-size: 0.85rem; color: #94a3b8; }
+
         .nav { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 5px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .nav-btn { background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.9rem; padding: 10px 5px; transition: 0.3s; white-space: nowrap; }
+        .nav-btn { background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; padding: 10px 5px; transition: 0.3s; white-space: nowrap; }
         .nav-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
         .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
         .quick-add { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
 
         .btn-glass-add { 
@@ -40,38 +43,48 @@
             color: white; border: none; padding: 14px; border-radius: 12px; 
             font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem;
         }
-        .btn-glass-add:disabled { opacity: 0.5; }
+        .btn-glass-add:active { transform: scale(0.98); opacity: 0.9; }
 
         input, select { 
-            background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); color: white; 
-            padding: 14px; border-radius: 12px; font-size: 1rem; width: 100%; box-sizing: border-box; outline: none;
+            background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); 
+            color: white; padding: 14px; border-radius: 12px; font-size: 1rem;
+            width: 100%; box-sizing: border-box;
         }
+
+        .month-pills { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+        .pill { background: rgba(30, 41, 59, 0.5); border: 1px solid var(--border); padding: 8px 18px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+        .pill.active { background: linear-gradient(45deg, var(--purple), var(--pink)); font-weight: bold; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .stat-item { text-align: center; background: rgba(30, 41, 59, 0.4); padding: 15px; border-radius: 18px; border: 1px solid var(--border); }
-        .stat-item h2 { margin: 8px 0 2px 0; font-size: 1.1rem; color: var(--accent); }
+        .stat-item h2 { margin: 8px 0 2px 0; font-size: 1.2rem; color: var(--accent); }
+        .stat-item small { font-size: 0.7rem; color: #94a3b8; }
 
         .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 450px; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th { text-align: left; padding: 12px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; }
         td { padding: 12px; border-top: 1px solid var(--border); font-size: 0.85rem; }
 
         .section { display: none; }
         .section.active { display: block; }
+
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; padding: 25px; border-radius: 20px; z-index: 100; border: 1px solid var(--accent); width: 85%; max-width: 380px; }
         .modal.active { display: block; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99; backdrop-filter: blur(4px); }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99; }
         .overlay.active { display: block; }
+        
+        .action-btns { display: flex; gap: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="header-bar">Finance Dashboard</div>
+    <div class="header-bar" id="current-date">Sunday, April 5, 2026</div>
 
     <div class="nav">
         <button class="nav-btn active" onclick="showSection('dashboard', event)">📊 Dashboard</button>
         <button class="nav-btn" onclick="showSection('salary', event)">💰 Salary</button>
         <button class="nav-btn" onclick="showSection('installments', event)">💳 Installments</button>
+        <button class="nav-btn" onclick="showSection('savings', event)">📈 Savings</button>
         <button class="nav-btn" onclick="showSection('daily', event)">📄 Daily</button>
     </div>
 
@@ -79,198 +92,213 @@
         <div class="glass-card">
             <div style="font-weight:bold; font-size: 0.9rem;"><span style="color:var(--warning)">⚡</span> Quick Add Expense</div>
             <div class="quick-add">
-                <input type="text" id="dash-item" placeholder="What did you buy?">
+                <input type="text" id="dash-item" placeholder="Item (e.g. WiFi, Water)">
                 <input type="number" id="dash-amt" placeholder="Amount (₱)">
                 <select id="dash-cat">
                     <option value="Others">Select Category</option>
                     <option value="Food & Diet">Food & Diet</option>
-                    <option value="Transport">Transport 🚗</option>
-                    <option value="Celebration">Celebration 🥳</option>
                     <option value="Household Bills">Household Bills</option>
-                    <option value="Home Credit - Samsung Phone">Home Credit - Samsung Phone</option>
-                    <option value="Home Credit - King Koil Mattress">Home Credit - King Koil Mattress</option>
+                    <option value="Home Credit">Home Credit</option>
                     <option value="GGives">GGives</option>
                 </select>
-                <button class="btn-glass-add" onclick="submitEntry('Daily Tracker', ['dash-item','dash-amt','dash-cat'])">Log Transaction</button>
+                <button class="btn-glass-add" onclick="submitEntry('Daily Tracker', ['dash-item','dash-amt','dash-cat'])">Add Transaction</button>
             </div>
         </div>
-
+        <div class="month-pills" id="month-pills"></div>
         <div class="stats-grid">
-            <div class="stat-item"><h2 id="total-spent">₱0</h2><small>Spent (Month)</small></div>
-            <div class="stat-item"><h2 id="debt-bal" style="color:var(--danger)">₱0</h2><small>Total Debt</small></div>
+            <div class="stat-item"><h2 id="total-spent">₱0</h2><small id="stat-month-label">Spent</small></div>
+            <div class="stat-item"><h2 id="total-trans">0</h2><small>Count</small></div>
+            <div class="stat-item"><h2 id="daily-avg">₱0</h2><small>Daily Avg</small></div>
+            <div class="stat-item"><h2 id="top-cat">-</h2><small>Top Category</small></div>
         </div>
-
         <div class="glass-card">
-            <h3 style="margin:0 0 15px 0; color:#94a3b8; font-size:0.8rem; text-transform:uppercase;">Monthly Trend</h3>
+            <h3 style="margin:0 0 15px 0; color:#94a3b8; font-size:0.8rem; text-transform:uppercase;">Spending Trend</h3>
             <div style="height:220px;"><canvas id="monthlyChart"></canvas></div>
-        </div>
-    </div>
-
-    <div id="installments" class="section">
-        <button class="btn-glass-add" style="width:100%; margin-bottom:20px;" onclick="openModal('instModal')">+ New Plan</button>
-        <div class="glass-card table-wrap">
-            <table id="instTable">
-                <thead><tr><th>Product</th><th>Total</th><th>Monthly</th><th>Remaining</th><th>Due</th><th></th></tr></thead>
-                <tbody></tbody>
-            </table>
         </div>
     </div>
 
     <div id="salary" class="section">
         <button class="btn-glass-add" style="width:100%; margin-bottom:20px;" onclick="openModal('salaryModal')">+ Add Salary</button>
-        <div class="glass-card table-wrap">
-            <table id="salaryTable">
-                <thead><tr><th>Source</th><th>Amount</th><th>Date</th><th>Month</th><th></th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
+        <div class="glass-card table-wrap"><table id="salaryTable"><thead><tr><th>Source</th><th>Amount</th><th>Date</th><th>Month</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div id="installments" class="section">
+        <button class="btn-glass-add" style="width:100%; margin-bottom:20px;" onclick="openModal('instModal')">+ New Plan</button>
+        <div class="glass-card table-wrap"><table id="instTable"><thead><tr><th>Product</th><th>Total</th><th>Monthly</th><th>Rem.</th><th>Due</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div id="savings" class="section">
+        <button class="btn-glass-add" style="width:100%; margin-bottom:20px;" onclick="openModal('savingsModal')">+ New Goal</button>
+        <div class="glass-card table-wrap"><table id="savingsTable"><thead><tr><th>Goal</th><th>Target</th><th>Current</th><th>Updated</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="daily" class="section">
-        <div class="glass-card table-wrap">
-            <table id="expenseTable">
-                <thead><tr><th>Item</th><th>Amount</th><th>Date</th><th>Category</th><th>Month</th><th></th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
+        <button class="btn-glass-add" style="width:100%; margin-bottom:20px;" onclick="openModal('expenseModal')">+ Add Expense</button>
+        <div class="glass-card table-wrap"><table id="expenseTable"><thead><tr><th>Item</th><th>Amount</th><th>Date</th><th>Category</th><th>Month</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
     
+    <div id="expenseModal" class="modal">
+        <h3>Add Expense</h3>
+        <input type="text" id="exp-item" placeholder="Item">
+        <input type="number" id="exp-amt" placeholder="Amount">
+        <select id="exp-cat">
+            <option value="Food & Diet">Food & Diet</option>
+            <option value="Household Bills">Household Bills</option>
+            <option value="Home Credit">Home Credit</option>
+            <option value="GGives">GGives</option>
+            <option value="Others">Others</option>
+        </select>
+        <button class="btn-glass-add" style="width:100%; margin-top:10px;" onclick="submitEntry('Daily Tracker', ['exp-item','exp-amt','exp-cat'])">Save</button>
+    </div>
+
     <div id="salaryModal" class="modal">
         <h3>Add Salary</h3>
         <input type="text" id="sal-source" placeholder="Source">
         <input type="number" id="sal-amt" placeholder="Amount">
-        <button class="btn-glass-add" style="width:100%;" onclick="submitEntry('Salary', ['sal-source','sal-amt'])">Save</button>
+        <button class="btn-glass-add" style="width:100%; margin-top:10px;" onclick="submitEntry('Salary', ['sal-source','sal-amt'])">Save</button>
     </div>
 
     <div id="instModal" class="modal">
-        <h3>New Installment Plan</h3>
-        <input type="text" id="ins-prod" placeholder="Product Name">
-        <input type="number" id="ins-total" placeholder="Total Cost">
-        <input type="number" id="ins-month" placeholder="Monthly Payment">
-        <input type="number" id="ins-rem" placeholder="Initial Remaining">
+        <h3>New Plan</h3>
+        <input type="text" id="ins-prod" placeholder="Product">
+        <input type="number" id="ins-total" placeholder="Total">
+        <input type="number" id="ins-month" placeholder="Monthly">
+        <input type="number" id="ins-rem" placeholder="Remaining">
         <input type="text" id="ins-due" placeholder="Due Date">
-        <button class="btn-glass-add" style="width:100%;" onclick="submitEntry('Installments', ['ins-prod','ins-total','ins-month','ins-rem','ins-due'])">Save</button>
+        <button class="btn-glass-add" style="width:100%; margin-top:10px;" onclick="submitEntry('Installments', ['ins-prod','ins-total','ins-month','ins-rem','ins-due'])">Save</button>
+    </div>
+
+    <div id="savingsModal" class="modal">
+        <h3>New Savings Goal</h3>
+        <input type="text" id="sav-goal" placeholder="Goal Name">
+        <input type="number" id="sav-target" placeholder="Target">
+        <input type="number" id="sav-current" placeholder="Current">
+        <button class="btn-glass-add" style="width:100%; margin-top:10px;" onclick="submitEntry('Savings', ['sav-goal','sav-target','sav-current'])">Save</button>
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyp57NT66ylKA1Tnu7d0MfkIVMBgvPrTAX_Iw_mK4PJuulLwEeTg4vpLCwZrKRRefY/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVt4kCdu8WEL9Il72vS2dZ1ay3Oq7eQE2nfPrq3YI2OOwuDVoTZqNhQ0WDfBMuTw/exec';
         let state = { expenses: [], salary: [], savings: [], installments: [] };
+        let selectedMonth = new Date().toLocaleString('default', { month: 'long' });
         let myChart = null;
 
         async function init() {
+            document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=dashboard`);
                 state = await res.json();
-                updateUI();
-            } catch (e) { console.error(e); }
+                renderPills();
+                updateDashboardUI();
+                renderAll();
+            } catch (e) { console.error("Sync failed", e); }
         }
 
-        function updateUI() {
-            const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-            
-            // Stats logic
-            const monthlySpent = state.expenses
-                .filter(e => e.values[4] === currentMonth)
-                .reduce((sum, e) => sum + (parseFloat(e.values[1]) || 0), 0);
-            
-            const totalDebt = state.installments
-                .reduce((sum, item) => sum + (parseFloat(item.values[3]) || 0), 0);
-
-            document.getElementById('total-spent').innerText = `₱${monthlySpent.toLocaleString()}`;
-            document.getElementById('debt-bal').innerText = `₱${totalDebt.toLocaleString()}`;
-
-            // --- FIXED TABLE RENDERING ---
-            renderTable('expenseTable', state.expenses, 'Daily Tracker');
-            renderTable('salaryTable', state.salary, 'Salary');
-            renderTable('instTable', state.installments, 'Installments');
-            
-            renderChart();
-        }
-
-        function renderTable(tableId, data, sheetName) {
-            const tbody = document.querySelector(`#${tableId} tbody`);
-            tbody.innerHTML = data.map(item => {
-                // We skip item.id because it's the timestamp/ID column in the sheet
-                const rowCells = item.values.map(v => {
-                    // Check if value is a date string and clean it up for display
-                    if (typeof v === 'string' && v.includes('T') && v.includes('Z')) {
-                        return `<td>${v.split('T')[0]}</td>`;
-                    }
-                    return `<td>${v || ''}</td>`;
-                }).join('');
-                
-                return `
-                <tr>
-                    ${rowCells}
-                    <td><button onclick="deleteEntry('${sheetName}', ${item.id})" style="background:none; border:none; color:var(--danger); cursor:pointer;">🗑️</button></td>
-                </tr>`;
+        function renderPills() {
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
+            const container = document.getElementById('month-pills');
+            container.innerHTML = months.map(m => {
+                const count = state.expenses.filter(e => e.values[4] === m).length;
+                if (count === 0 && m !== currentMonthName && m !== selectedMonth) return ''; 
+                return `<div class="pill ${m === selectedMonth ? 'active' : ''}" onclick="changeMonth('${m}')">
+                    ${m} <span>${count}</span>
+                </div>`;
             }).join('');
         }
 
-        async function submitEntry(sheet, fields) {
-            const btn = event.target;
-            btn.innerText = "Syncing...";
-            btn.disabled = true;
-            
-            const data = fields.map(id => document.getElementById(id).value);
-            const now = new Date();
-            let finalData = [];
-            
-            if (sheet === 'Daily Tracker') {
-                const amountPaid = parseFloat(data[1]);
-                const category = data[2];
+        function changeMonth(m) { selectedMonth = m; renderPills(); updateDashboardUI(); }
 
-                if (category.includes("Home Credit")) {
-                    const productName = category.replace("Home Credit - ", "").trim();
-                    const target = state.installments.find(i => i.values[0].toLowerCase() === productName.toLowerCase());
-                    if (target) {
-                        const newRemaining = parseFloat(target.values[3]) - amountPaid;
-                        await fetch(`${SCRIPT_URL}?action=updateRemaining&id=${target.id}&newVal=${newRemaining}`);
-                    }
+        function updateDashboardUI() {
+            let total = 0, trans = 0;
+            let catTotals = {};
+            state.expenses.forEach(e => {
+                if (e.values[4] === selectedMonth) {
+                    const amt = parseFloat(e.values[1]) || 0;
+                    total += amt;
+                    trans++;
+                    const cat = e.values[3];
+                    catTotals[cat] = (catTotals[cat] || 0) + amt;
                 }
-                finalData = [data[0], data[1], now.toISOString().split('T')[0], data[2], now.toLocaleString('default', { month: 'long' })];
-            } else if (sheet === 'Salary') {
-                finalData = [data[0], data[1], now.toISOString().split('T')[0], now.toLocaleString('default', { month: 'long' })];
-            } else {
-                finalData = data;
-            }
-
-            try {
-                await fetch(`${SCRIPT_URL}?action=addEntry&sheet=${sheet}&data=${encodeURIComponent(JSON.stringify(finalData))}`);
-                location.reload();
-            } catch (e) {
-                btn.disabled = false;
-                btn.innerText = "Error";
-            }
-        }
-
-        async function deleteEntry(sheet, id) { 
-            if (confirm('Delete this?')) { 
-                await fetch(`${SCRIPT_URL}?action=deleteEntry&sheet=${sheet}&id=${id}`); 
-                location.reload(); 
-            } 
+            });
+            document.getElementById('total-spent').innerText = `₱${total.toLocaleString()}`;
+            document.getElementById('total-trans').innerText = trans;
+            document.getElementById('daily-avg').innerText = `₱${(trans > 0 ? (total/30).toFixed(0) : 0).toLocaleString()}`;
+            document.getElementById('stat-month-label').innerText = `Spent (${selectedMonth})`;
+            const top = Object.entries(catTotals).sort((a,b) => b[1] - a[1])[0];
+            document.getElementById('top-cat').innerText = top ? top[0] : '-';
+            renderChart();
         }
 
         function renderChart() {
             const ctx = document.getElementById('monthlyChart').getContext('2d');
             const months = ["January", "February", "March", "April", "May", "June"];
-            const chartData = months.map(m => state.expenses.filter(e => e.values[4] === m).reduce((acc, curr) => acc + (parseFloat(curr.values[1]) || 0), 0));
+            const data = months.map(m => state.expenses.filter(e => e.values[4] === m).reduce((acc, curr) => acc + (parseFloat(curr.values[1]) || 0), 0));
             if (myChart) myChart.destroy();
             myChart = new Chart(ctx, {
                 type: 'bar',
-                data: { labels: months, datasets: [{ label: 'Spent', data: chartData, backgroundColor: 'rgba(0, 210, 255, 0.4)', borderColor: '#00d2ff', borderWidth: 1 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
+                data: { labels: months, datasets: [{ label: 'Spent', data: data, backgroundColor: months.map(m => m === selectedMonth ? '#9d50bb' : 'rgba(255,255,255,0.1)'), borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } } }, plugins: { legend: { display: false } } }
             });
         }
 
-        function showSection(id, e) { 
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); 
-            document.getElementById(id).classList.add('active'); 
-            if(e) e.target.classList.add('active'); 
+        function renderAll() {
+            renderTable('expenseTable', state.expenses, 'Daily Tracker');
+            renderTable('salaryTable', state.salary, 'Salary');
+            renderTable('savingsTable', state.savings, 'Savings');
+            renderTable('instTable', state.installments, 'Installments');
         }
+
+        function renderTable(tableId, data, sheetName) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = data.map(item => {
+                const rowCells = item.values.map(v => {
+                    if (typeof v === 'string' && v.includes('T') && v.includes('Z')) return `<td>${v.split('T')[0]}</td>`;
+                    return `<td>${v || ''}</td>`;
+                }).join('');
+                return `<tr>${rowCells}<td class="action-btns">
+                    <button onclick='editEntry("${sheetName}", ${item.id}, ${JSON.stringify(item.values)})' style="background:none; border:none; cursor:pointer;">✏️</button>
+                    <button onclick="deleteEntry('${sheetName}', ${item.id})" style="background:none; border:none; color:var(--danger); cursor:pointer;">🗑️</button>
+                </td></tr>`;
+            }).join('');
+        }
+
+        async function submitEntry(sheet, fields) {
+            const btn = event.target;
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+            const data = fields.map(id => document.getElementById(id).value);
+            const now = new Date();
+            let finalData = [];
+            if (sheet === 'Daily Tracker') finalData = [data[0], data[1], now.toISOString().split('T')[0], data[2], now.toLocaleString('default', { month: 'long' })];
+            else if (sheet === 'Salary') finalData = [data[0], data[1], now.toISOString().split('T')[0], now.toLocaleString('default', { month: 'long' })];
+            else if (sheet === 'Savings') finalData = [data[0], data[1], data[2], now.toLocaleDateString()];
+            else finalData = data;
+            await fetch(`${SCRIPT_URL}?action=addEntry&sheet=${sheet}&data=${encodeURIComponent(JSON.stringify(finalData))}`);
+            location.reload();
+        }
+
+        async function editEntry(sheet, id, currentValues) {
+            let newValueRaw = prompt("Edit values (comma separated):", currentValues.join(', '));
+            if (newValueRaw) {
+                let newData = newValueRaw.split(',').map(s => s.trim());
+                if (sheet === 'Installments') {
+                    const monthly = parseFloat(newData[2]) || 0;
+                    let remaining = parseFloat(newData[3]) || 0;
+                    if (confirm(`Deduct payment of ₱${monthly} from remaining balance?`)) {
+                        newData[3] = (remaining - monthly).toString();
+                    }
+                }
+                await fetch(`${SCRIPT_URL}?action=updateEntry&sheet=${sheet}&id=${id}&data=${encodeURIComponent(JSON.stringify(newData))}`);
+                location.reload();
+            }
+        }
+
+        async function deleteEntry(sheet, id) { if (confirm('Delete?')) { await fetch(`${SCRIPT_URL}?action=deleteEntry&sheet=${sheet}&id=${id}`); location.reload(); } }
+        function showSection(id, e) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); if(e) e.target.classList.add('active'); }
         function openModal(id) { document.getElementById(id).classList.add('active'); document.getElementById('overlay').classList.add('active'); }
         function closeAllModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); document.getElementById('overlay').classList.remove('active'); }
         window.onload = init;
