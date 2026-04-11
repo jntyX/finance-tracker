@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<div style="font-family: 'Kanit', sans-serif; letter-spacing: 1px; display: flex; align-items: center; padding: 0px 10px 15px 15px; margin: 0;">
-    <span style="font-weight: 300; color: #ffffff; font-size: 28px; opacity: 0.9;">tall</span>
-    <span style="font-weight: 600; color: #00d2ff; font-size: 28px; text-shadow: 0 0 15px rgba(0, 210, 255, 0.6); margin: 0 1px;">i</span>
-    <span style="font-weight: 300; color: #ffffff; font-size: 28px; opacity: 0.9;">y</span>
-</div>
+    <title>talliy</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg: #0b0f1a;
@@ -32,71 +28,128 @@
             padding: 15px;
             margin: 0;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
- .header-bar { 
-    background: var(--glass-header); 
-    backdrop-filter: blur(10px);
-    /* Remove fixed height if you have one */
-    padding: 15px 20px; /* Gives breathable space at top/bottom/sides */
-    margin: -15px -15px 25px -15px; 
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    flex-direction: column; 
-    gap: 3px; /* This creates the perfect gap between logo and date */
-    align-items: flex-start; /* Keeps everything to the left */
-}
+        h2, h3, .header-bar, .nav-btn, .btn-glass-add, th, .pill.active, #table-month-indicator, .stat-item small {
+            font-weight: 600; 
+        }
 
-.logo-wrap {
-    padding: 10px 0 0 15px; /* Precision spacing for top and left */
-    line-height: 1; /* Prevents text from adding extra bottom space */
-}
+        .header-bar { 
+            background: var(--glass-header); 
+            backdrop-filter: blur(10px);
+            padding: 12px 20px; 
+            margin: -15px -15px 25px -15px; 
+            font-size: 0.85rem; 
+            color: #94a3b8; 
+            border-bottom: 1px solid var(--border);
+        }
 
-#current-date {
+        .nav { 
+            display: flex; 
+            gap: 15px; 
+            margin-bottom: 25px; 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 5px; 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .nav::-webkit-scrollbar { display: none; }
 
-    padding-left: 17px;
-    padding-bottom: 10px;
-    font-size: 0.75rem;
-    opacity: 0.6;
-}
-
-        .nav { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 5px; overflow-x: auto; scrollbar-width: none; }
-        .nav-btn { background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; padding: 10px 5px; transition: 0.3s; white-space: nowrap; font-family: 'Kanit', sans-serif; }
+        .nav-btn { 
+            background: none; border: none; color: #64748b; cursor: pointer; 
+            font-size: 0.9rem; display: flex; align-items: center; gap: 8px; 
+            padding: 10px 5px; transition: 0.3s; white-space: nowrap; 
+            font-family: 'Kanit', sans-serif;
+        }
         .nav-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
 
-        .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
-        .btn-glass-add { background: linear-gradient(45deg, var(--purple), var(--pink)); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 14px; border-radius: 16px; cursor: pointer; width: 100%; font-size: 1rem; font-family: 'Kanit', sans-serif; transition: 0.3s; }
+        .glass-card { 
+            background: var(--glass); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid var(--border); 
+            border-radius: 24px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); 
+        }
+
+        .btn-glass-add { 
+            background: linear-gradient(45deg, rgba(157, 80, 187, 0.6), rgba(110, 72, 170, 0.6)); 
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white; padding: 14px; border-radius: 16px; 
+            cursor: pointer; width: 100%; font-size: 1rem;
+            font-family: 'Kanit', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input, select { 
+            background: rgba(0, 0, 0, 0.2); 
+            border: 1px solid var(--border); 
+            color: white; padding: 14px; border-radius: 14px; font-size: 1rem;
+            width: 100%; box-sizing: border-box; margin-bottom: 12px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 400;
+        }
+
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 12px; 
+            margin-bottom: 20px; 
+        }
         
-        input, select { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); color: white; padding: 14px; border-radius: 14px; font-size: 1rem; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: 'Kanit', sans-serif; }
+        .stat-item { 
+            text-align: center; background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(10px); padding: 15px; border-radius: 20px; border: 1px solid var(--border); 
+            overflow: hidden;
+        }
+        
+        .stat-item h2 { 
+            margin: 8px 0 2px 0; 
+            font-size: 1.25rem; 
+            color: var(--accent); 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .stat-item { text-align: center; background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 20px; border: 1px solid var(--border); }
-        .stat-item h2 { margin: 8px 0 2px 0; font-size: 1.25rem; color: var(--accent); }
-
-        .table-wrap { overflow-x: auto; border-radius: 12px; }
+        .table-wrap { 
+            overflow-x: auto; 
+            border-radius: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th { text-align: left; padding: 14px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; }
-        td { padding: 14px; border-top: 1px solid var(--border); font-size: 0.85rem; color: #cbd5e1; }
+        td { padding: 14px; border-top: 1px solid var(--border); font-size: 0.85rem; color: #cbd5e1; font-weight: 400; }
 
         .section { display: none; }
         .section.active { display: block; }
 
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(25px); padding: 25px; border-radius: 28px; z-index: 100; border: 1px solid var(--border); width: 92%; max-width: 380px; }
-        
-        .pill { padding: 8px 15px; border-radius: 20px; background: rgba(255,255,255,0.05); cursor: pointer; white-space: nowrap; font-size: 0.8rem; border: 1px solid var(--border); }
-        .pill.active { background: var(--purple); color: white; border-color: var(--accent); }
+        .modal { 
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(25px);
+            padding: 25px; border-radius: 28px; z-index: 100; 
+            border: 1px solid var(--border); width: 92%; max-width: 380px; 
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal.active { display: block; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 99; }
+        .overlay.active { display: block; }
+
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .glass-card { padding: 15px; }
+            .stat-item { padding: 12px; }
+            .stat-item h2 { font-size: 1.1rem; }
+            .stat-item small { font-size: 0.7rem; }
+            .header-bar { padding: 10px 15px; margin-bottom: 15px; }
+        }
     </style>
 </head>
-<body>
-
-
-    <div class="nav" id="main-nav" style="display:none;">
-        <button class="nav-btn active" onclick="showSection('dashboard')">💎 Dashboard</button>
-        <button class="nav-btn" onclick="showSection('salary')">💸 Salary</button>
-        <button class="nav-btn" onclick="showSection('installments')">💳 Installments</button>
-        <button class="nav-btn" onclick="showSection('savings')">👛 Savings</button>
-        <button class="nav-btn" onclick="showSection('daily')">☀️ Daily</button>
-    </div>
 <body>
 
     <div class="header-bar" id="current-date">Loading...</div>
